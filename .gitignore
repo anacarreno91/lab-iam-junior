@@ -1,0 +1,23 @@
+# Discos e imágenes de máquinas virtuales: pesan varios GB y la ISO de Windows Server tiene licencia
+*.vdi
+*.vmdk
+*.vhd
+*.vhdx
+*.ova
+*.ovf
+*.iso
+*.sav
+*.vbox
+*.vbox-prev
+Logs/
+*.log
+
+# Exportaciones completas del registro de eventos: pueden incluir datos del sistema que no deben publicarse
+*.evtx
+
+# Archivos del sistema operativo y temporales de Office
+Thumbs.db
+desktop.ini
+.DS_Store
+~$*
+*.tmp
