@@ -8,19 +8,19 @@ Este lab usa la numeración de **ISO/IEC 27001:2022**. En la versión de 2013 es
 
 | Control (2022) | Qué exige, en resumen | Equivalencia 2013 | Dónde se ve en este repositorio |
 |---|---|---|---|
-| **A.5.16** Gestión de identidades | Gestionar el ciclo de vida completo de las identidades | A.9.2.1 | [docs/01](01-Joiner-Mover-Leaver.md) y el registro |
-| **A.5.18** Derechos de acceso | Conceder, revisar, modificar y retirar los accesos según la política de control de acceso | A.9.2.2, A.9.2.5, A.9.2.6 | Capturas 01 y 02, revisión de este documento |
-| **A.8.15** Registros de eventos | Generar, conservar y proteger los registros de actividad | A.12.4.1 a A.12.4.3 | Captura 03 |
+| **A.5.16** Gestión de identidades | Gestionar el ciclo de vida completo de las identidades | A.9.2.1 | [docs/01](01-Joiner-Mover-Leaver.md) y el [registro](../registros/registro-solicitudes-acceso.csv) |
+| **A.5.18** Derechos de acceso | Conceder, revisar, modificar y retirar los accesos según la política de control de acceso | A.9.2.2, A.9.2.5, A.9.2.6 | Capturas [01](../evidencias/01-alta-joiner-memberof-GG-Ventas.png) y [02](../evidencias/02-baja-leaver-memberof-revocada.png); revisión de este documento (pendiente) |
+| **A.8.15** Registros de eventos | Generar, conservar y proteger los registros de actividad | A.12.4.1 a A.12.4.3 | Captura [03](../evidencias/03-auditoria-eventos-4725-4729.png) |
 
 ## Qué pediría un auditor y dónde está
 
 | Pregunta del auditor | Respuesta en este repositorio |
 |---|---|
 | ¿Hubo solicitud y aprobación? | [Registro](../registros/registro-solicitudes-acceso.csv): columnas `solicitante` y `aprobador` (simulados) |
-| ¿Se concedió lo aprobado y nada más? | Captura 01: solo `GG-Ventas` |
-| ¿Se retiró el acceso a tiempo? | Hora de la solicitud en el registro frente a la hora del evento 4725 en la captura 03 |
-| ¿Lo confirma el sistema, no solo la operadora? | Captura 03: eventos generados por Windows |
-| ¿Se revisan los accesos de forma periódica? | Revisión de `GG-Ventas` (abajo) y fila `SIM-003` del registro |
+| ¿Se concedió lo aprobado y nada más? | Captura 01 Member Of (14:21): `Domain Users` y `GG-Ventas`, nada más |
+| ¿Se retiró el acceso a tiempo? | Ejecución a las 14:25:49 (4725) y 14:26:28 (4729). La hora de la solicitud no se anotó, así que el plazo todavía no se puede demostrar (H-02) |
+| ¿Lo confirma el sistema, no solo la operadora? | Captura 03: eventos 4725 y 4729 generados por Windows, coherentes con las capturas de antes (14:21) y después (14:28). La captura no muestra la cuenta de destino; la atribución a `a.baja` se completará con la línea temporal exportada (H-03) |
+| ¿Se revisan los accesos de forma periódica? | Procedimiento escrito (abajo); primera ejecución pendiente (`SIM-003`) |
 
 ## Revisión de accesos de GG-Ventas
 
@@ -31,7 +31,7 @@ Este lab usa la numeración de **ISO/IEC 27001:2022**. En la versión de 2013 es
 3. Cualquier miembro sin un alta vigente que lo justifique es una desviación.
 4. Anoto la fecha, el resultado y, si las hay, las desviaciones y su tratamiento.
 
-**Ejecución en el lab:** la primera revisión de prueba se hace después de la baja de `a.baja` y se registra como `SIM-003`; el resultado se anota en la columna `observaciones` del registro.
+**Ejecución en el lab:** pendiente. La primera revisión se registrará como `SIM-003`, con el resultado en la columna `observaciones` del registro.
 
 ## Ejercicio de mesa: ¿y si la revisión encuentra una cuenta huérfana?
 
