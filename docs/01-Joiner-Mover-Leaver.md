@@ -2,15 +2,15 @@
 
 > **Caso simulado:** `a.baja` es un usuario ficticio de laboratorio. No es una persona real.
 
-Cada petición sigue el mismo circuito, igual que un expediente: **solicitud registrada → aprobación → ejecución → evidencia → cierre**. Todas las peticiones del lab están en [`registros/registro-solicitudes-acceso.csv`](../registros/registro-solicitudes-acceso.csv). Las horas corresponden a la ejecución del 26/10/2026.
+Cada petición sigue el mismo circuito, igual que un expediente: **solicitud registrada → aprobación → ejecución → evidencia → cierre**. Todas las peticiones del lab están en [`registros/registro-solicitudes-acceso.csv`](../registros/registro-solicitudes-acceso.csv). Las horas corresponden a la ejecución del 26/10/2026 y salen del registro de Seguridad ([línea temporal](../evidencias/03-linea-temporal-a.baja.png)).
 
 ## Joiner (alta)
 
 | Paso | Qué hago | Qué queda como evidencia |
 |---|---|---|
 | 1 | Registro la solicitud de alta con la aprobación del responsable de Ventas (simulada) | Fila `SIM-001` del registro |
-| 2 | Creo `a.baja` en `OU=Ventas` con el aviso de caso simulado en *Description*. El procedimiento exige contraseña temporal con *User must change password at next logon*; en esta ejecución quedó marcada *Password never expires* (hallazgo H-01) | Evento 4720 (cuenta creada), pendiente de exportar (H-03) |
-| 3 | Lo añado **solo** a `GG-Ventas` | Evento 4728 (miembro añadido a un grupo global de seguridad), pendiente de exportar (H-03) |
+| 2 | Creo `a.baja` en `OU=Ventas` con el aviso de caso simulado en *Description*. El procedimiento exige contraseña temporal con *User must change password at next logon*; en esta ejecución quedó marcada *Password never expires* (hallazgo H-01, corregido el 27/10/2026) | Evento 4720 (cuenta creada) a las 14:00:03 |
+| 3 | Lo añado **solo** a `GG-Ventas` | Evento 4728 (miembro añadido a un grupo global de seguridad) a las 14:17:26 |
 | 4 | Compruebo la OU y la pestaña *Member Of*: `Domain Users` y `GG-Ventas` | Capturas [01 OU](../evidencias/01-alta-joiner-OU-Ventas.png) (14:20) y [01 Member Of](../evidencias/01-alta-joiner-memberof-GG-Ventas.png) (14:21) |
 | 5 | Cierro la solicitud en el registro | Fila `SIM-001` actualizada |
 
