@@ -2,9 +2,9 @@
 
 > **⚠️ CASO SIMULADO.** `a.baja` es un usuario ficticio creado para practicar un proceso de baja (*offboarding*). **No corresponde a ninguna persona real.** El dominio `iamlab.local` es un laboratorio personal en VirtualBox, sin datos de ninguna empresa.
 
-Laboratorio de operaciones IAM de nivel 1: altas, cambios y bajas de usuarios en Active Directory y permisos asignados por grupos (RBAC), con una regla que se aplica a todo: **cada acción deja una evidencia que un auditor puede comprobar sin tener que preguntarme**. Incluye la autoauditoría de mi propia ejecución: los hallazgos que encontré y cómo los cerré.
+Laboratorio personal para practicar tareas de operación IAM de nivel 1 en Active Directory: altas y bajas de usuarios, permisos asignados por grupos (RBAC) y registro de cada acción con su evidencia (capturas, eventos de Windows y un registro de solicitudes). También incluye la revisión que hice de mi propia ejecución y los fallos que encontré.
 
-## En 30 segundos
+## Resumen
 
 | Qué se demuestra | Cómo | Evidencia |
 |---|---|---|
@@ -40,20 +40,20 @@ Una petición de alta o de baja de accesos es el mismo tipo de trabajo: llega un
 
 | # | Caso | Estado | Detalle |
 |---|---|---|---|
-| 1 | Joiner: alta de `a.baja` en Ventas | ✅ Ejecutado y evidenciado (capturas y eventos 4720/4728) | [docs/01](docs/01-Joiner-Mover-Leaver.md#joiner-alta) |
-| 2 | Leaver: baja y revocación | ✅ Ejecutado y evidenciado (capturas y eventos 4725/4729) · ⚠️ plazo no demostrable (H-02) | [docs/01](docs/01-Joiner-Mover-Leaver.md#leaver-baja) |
-| 3 | Revisión de accesos de `GG-Ventas` | ✅ Primera revisión el 27/10/2026, sin desviaciones (`SIM-003`) | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md#revisión-de-accesos-de-gg-ventas) |
-| 4 | Mover: cambio de rol | 📄 Procedimiento escrito, sin ejecutar | [docs/01](docs/01-Joiner-Mover-Leaver.md#mover-cambio-de-rol) |
+| 1 | Joiner: alta de `a.baja` en Ventas | Hecho, con capturas y eventos 4720/4728 | [docs/01](docs/01-Joiner-Mover-Leaver.md#joiner-alta) |
+| 2 | Leaver: baja y revocación | Hecho, con capturas y eventos 4725/4729. Plazo no demostrable (H-02) | [docs/01](docs/01-Joiner-Mover-Leaver.md#leaver-baja) |
+| 3 | Revisión de accesos de `GG-Ventas` | Hecha el 27/10/2026, sin desviaciones (`SIM-003`) | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md#revisión-de-accesos-de-gg-ventas) |
+| 4 | Mover: cambio de rol | Solo procedimiento escrito, sin ejecutar | [docs/01](docs/01-Joiner-Mover-Leaver.md#mover-cambio-de-rol) |
 
 ## Hallazgos de la autoauditoría
 
-Revisé mis propias evidencias como lo haría un auditor. Esto es lo que encontré y cómo lo traté:
+Al revisar mis capturas y el registro de eventos encontré tres fallos en mi propia ejecución:
 
 | ID | Hallazgo | Estado | Cierre |
 |---|---|---|---|
-| H-01 | `a.baja` tenía marcada *Password never expires*. Contradecía mi procedimiento de alta (contraseña temporal con cambio obligatorio) y, en un entorno real, sería una desviación de la política de contraseñas (A.5.17). | ✅ Cerrado el 27/10/2026 | Corregido con `Set-ADUser` (`SIM-004`). Evidencia: estado antes y después en [04 corrección](evidencias/04-correccion-H01-PasswordNeverExpires-False.png) y evento 4738 a las 08:37:52 en la [línea temporal](evidencias/03-linea-temporal-a.baja.png). |
-| H-02 | No anoté la hora de la solicitud de baja simulada (`SIM-002`) antes de ejecutarla, así que el plazo de 24 h no se puede demostrar con evidencia. | ⚠️ Abierto | No se corrige hacia atrás: anotar ahora una hora sería falsear la evidencia. Se cierra en el próximo caso, registrando la solicitud antes de tocar AD. |
-| H-03 | La captura del Event Viewer no mostraba la cuenta de destino ni los eventos del alta, y tenía un segundo 4725 a las 16:47:39 sin explicar. | ✅ Cerrado el 27/10/2026 | Línea temporal exportada con PowerShell y filtrada por `a.baja` ([03 línea temporal](evidencias/03-linea-temporal-a.baja.png)). El 4725 de las 16:47:39 es de `a.baja` y no tiene un 4722 (cuenta habilitada) antes: la deshabilitación se volvió a aplicar sobre una cuenta que ya estaba deshabilitada, y no hubo ninguna ventana de acceso. |
+| H-01 | `a.baja` tenía marcada *Password never expires*. Contradecía mi procedimiento de alta (contraseña temporal con cambio obligatorio) y, en un entorno real, sería una desviación de la política de contraseñas (A.5.17). | Cerrado el 27/10/2026 | Corregido con `Set-ADUser` (`SIM-004`). Evidencia: estado antes y después en [04 corrección](evidencias/04-correccion-H01-PasswordNeverExpires-False.png) y evento 4738 a las 08:37:52 en la [línea temporal](evidencias/03-linea-temporal-a.baja.png). |
+| H-02 | No anoté la hora de la solicitud de baja simulada (`SIM-002`) antes de ejecutarla, así que el plazo de 24 h no se puede demostrar con evidencia. | Abierto | No se puede corregir hacia atrás, porque anotar ahora una hora sería falsear la evidencia. Lo cerraré en el próximo caso, registrando la solicitud antes de tocar AD. |
+| H-03 | La captura del Event Viewer no mostraba la cuenta de destino ni los eventos del alta, y tenía un segundo 4725 a las 16:47:39 sin explicar. | Cerrado el 27/10/2026 | Línea temporal exportada con PowerShell y filtrada por `a.baja` ([03 línea temporal](evidencias/03-linea-temporal-a.baja.png)). El 4725 de las 16:47:39 es de `a.baja` y no tiene un 4722 (cuenta habilitada) antes: la deshabilitación se volvió a aplicar sobre una cuenta que ya estaba deshabilitada, y no hubo ninguna ventana de acceso. |
 
 ## Mapeo con ISO/IEC 27001:2022
 
@@ -65,19 +65,20 @@ Revisé mis propias evidencias como lo haría un auditor. Esto es lo que encontr
 
 La versión 2013 de la norma dejó de ser válida para certificar el 31 de octubre de 2025. Este repositorio usa la numeración de 2022 e indica la antigua solo como referencia.
 
-## Por qué esto importa en entornos industriales (OT)
+## Relación con entornos industriales (OT)
 
-Este laboratorio es un entorno IT (Active Directory). Mi relación con OT es de criterio, no de experiencia en planta. Lo que traslado:
+El laboratorio es un entorno IT. No tengo experiencia en entornos industriales; lo que aplico de mi formación en ciberseguridad OT es esto:
 
-- **En OT manda la disponibilidad.** Una cuenta que nadie revoca, como la de un técnico de un proveedor que ya terminó su trabajo, es un riesgo directo para la continuidad del proceso. Por eso el objetivo de baja en menos de 24 horas y la revisión periódica.
-- **Cuentas nominales, no compartidas.** Si varias personas usan la misma cuenta, el registro no permite saber quién hizo qué. En este lab cada acción queda asociada a una cuenta y a una hora.
-- **Marco normativo.** La Directiva NIS2 (UE) 2022/2555 incluye las políticas de control de acceso entre las medidas de gestión de riesgos de ciberseguridad (art. 21.2.i) y sitúa la energía entre los sectores de alta criticidad (anexo I).
+- En OT la prioridad es la disponibilidad. Una cuenta que no se revoca a tiempo, por ejemplo la de un técnico externo que ya terminó su trabajo, es un riesgo para la continuidad del proceso. Por eso el objetivo de baja en menos de 24 horas y la revisión periódica.
+- Las cuentas compartidas impiden saber quién hizo cada cambio, así que cada persona debe tener su propia cuenta. En este lab todavía administro con la cuenta Administrator integrada (ver límites).
+- La Directiva NIS2 (UE) 2022/2555 incluye las políticas de control de acceso entre las medidas de gestión de riesgos de ciberseguridad (art. 21.2.i) y sitúa la energía entre los sectores de alta criticidad (anexo I).
 
 ## Límites del laboratorio
 
 - Un solo controlador de dominio, sin usuarios reales y sin conexión con ningún sistema de producción.
 - Solicitudes y aprobaciones simuladas. En una empresa llegarían por ticket desde RRHH o desde el responsable del área.
 - Ejecuto y verifico yo misma. En un entorno real la verificación la haría otra persona (segregación de funciones, ISO/IEC 27001:2022 A.5.3).
+- Las acciones se hacen con la cuenta Administrator integrada del dominio. En un entorno real se usaría una cuenta de administración nominal, para que cada cambio quede asociado a una persona.
 - Solo herramientas nativas de Windows Server: no se usa ninguna plataforma de gobierno de identidades (IGA) ni de accesos privilegiados (PAM).
 - Ejecución del ciclo el 26/10/2026; autoauditoría, corrección y primera revisión el 27/10/2026.
 
@@ -86,32 +87,8 @@ Este laboratorio es un entorno IT (Active Directory). Mi relación con OT es de 
 - Caso Mover con la solicitud registrada antes de ejecutar (cierra H-02): un usuario simulado que pasa de `GG-Ventas` a `GG-Ventas-RO`.
 - Carpeta compartida de Ventas con permisos NTFS asignados a `GG-Ventas` (modificar) y `GG-Ventas-RO` (lectura).
 - Cuenta de un proveedor externo con fecha de caducidad (*Account expires*) dentro de un grupo de acceso remoto para mantenimiento: el caso más parecido a un acceso en OT.
+- Administrar con una cuenta nominal en lugar de la cuenta Administrator integrada.
 - Siguiente revisión mensual de `GG-Ventas`.
-
-## Estructura del repositorio
-
-```
-lab-iam-junior/
-├── README.md
-├── docs/
-│   ├── 01-Joiner-Mover-Leaver.md
-│   ├── 02-RBAC-y-minimo-privilegio.md
-│   └── 03-ISO27001-2022-control-de-accesos-y-evidencias.md
-├── evidencias/
-│   ├── README.md
-│   ├── 01-alta-joiner-OU-Ventas.png
-│   ├── 01-alta-joiner-memberof-GG-Ventas.png
-│   ├── 02-baja-leaver-memberof-revocada.png
-│   ├── 02-baja-leaver-Account-is-disabled.png
-│   ├── 02-baja-leaver-OU-deshabilitada.png
-│   ├── 03-auditoria-eventos-4725-4729.png
-│   ├── 03-linea-temporal-a.baja.png
-│   ├── 04-correccion-H01-PasswordNeverExpires-False.png
-│   └── 04-revision-SIM-003-GG-Ventas-vacia.png
-├── registros/
-│   └── registro-solicitudes-acceso.csv
-└── .gitignore
-```
 
 ---
 

@@ -4,7 +4,7 @@
 
 Nueve capturas de Windows Server 2022 (interfaz en inglés): seis de la ejecución del ciclo el **26/10/2026** y tres de la autoauditoría del **27/10/2026**. Las horas son las del reloj de la máquina virtual, pasadas a formato de 24 horas. Ninguna imagen está editada.
 
-Juntas responden a las tres preguntas de cualquier auditoría de accesos: **qué se concedió, qué se retiró y qué dice el sistema**.
+Muestran qué acceso se concedió, cuándo se retiró y qué registró Windows en cada paso.
 
 ## Línea temporal
 
@@ -29,7 +29,7 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 | 27/10 08:43 | Revisión `SIM-003`: `GG-Ventas` sin miembros | `04-revision-SIM-003-GG-Ventas-vacia.png` |
 | 27/10 09:05 | Exportación de la línea temporal y de `whenCreated` | `03-linea-temporal-a.baja.png` |
 
-**Lectura de auditor:** cada captura de estado encaja con un evento del sistema. `GG-Ventas` se añade a las 14:17:26 y aparece en la captura de las 14:21; se retira a las 14:26:28 y ya no está en la de las 14:28. El único 4722 de toda la línea temporal es el de la creación, así que después de la baja la cuenta no volvió a estar habilitada en ningún momento.
+**Conclusión:** cada captura de estado encaja con un evento del sistema. `GG-Ventas` se añade a las 14:17:26 y aparece en la captura de las 14:21; se retira a las 14:26:28 y ya no está en la de las 14:28. El único 4722 de toda la línea temporal es el de la creación, así que después de la baja la cuenta no volvió a estar habilitada en ningún momento.
 
 ## Capturas del 26/10/2026: ejecución del ciclo
 
@@ -44,7 +44,7 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 - **Qué se ve:** *a.baja Properties → Member Of*: `Domain Users` (grupo principal) y `GG-Ventas`. Nada más.
 - **Pregunta de auditoría:** ¿se concedió solo lo aprobado?
 - **Control:** A.5.18 Derechos de acceso.
-- **Por qué es crítica:** es la línea base. Sin saber con certeza qué accesos se dieron, no se puede asegurar después que la baja los retiró todos.
+- **Para qué sirve:** es la línea base. Sin saber con certeza qué accesos se dieron, no se puede asegurar después que la baja los retiró todos.
 
 ### 02-baja-leaver-memberof-revocada.png · 14:28
 
@@ -100,9 +100,9 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 
 | ID | Resumen | Estado |
 |---|---|---|
-| H-01 | *Password never expires* marcada en `a.baja` | ✅ Cerrado el 27/10/2026 |
-| H-02 | Hora de la solicitud de baja no anotada: el plazo de 24 h no se puede demostrar | ⚠️ Abierto: se cierra en el próximo caso |
-| H-03 | Captura del Event Viewer sin cuenta de destino ni eventos de alta, y un 4725 sin atribuir | ✅ Cerrado el 27/10/2026 |
+| H-01 | *Password never expires* marcada en `a.baja` | Cerrado el 27/10/2026 |
+| H-02 | Hora de la solicitud de baja no anotada: el plazo de 24 h no se puede demostrar | Abierto: se cerrará en el próximo caso |
+| H-03 | Captura del Event Viewer sin cuenta de destino ni eventos de alta, y un 4725 sin atribuir | Cerrado el 27/10/2026 |
 
 El detalle está en el [README principal](../README.md#hallazgos-de-la-autoauditoría).
 
@@ -111,6 +111,6 @@ El detalle está en el [README principal](../README.md#hallazgos-de-la-autoaudit
 - Reloj de la máquina virtual visible.
 - Aviso de caso simulado visible en *Description* cuando la captura muestre la cuenta.
 - Solo la ventana de la máquina virtual: sin escritorio del equipo anfitrión, notificaciones ni datos personales reales.
-- Sin retoques: una evidencia editada deja de ser evidencia.
+- Las capturas no se editan.
 - En el Event Viewer, el detalle del evento debe mostrar *Subject* y *Target Account*.
 - Antes de ejecutar un cambio, la solicitud se anota en el registro con su hora.

@@ -20,7 +20,7 @@ Cada petición sigue el mismo circuito, igual que un expediente: **solicitud reg
 
 | Paso | Qué hago | Por qué |
 |---|---|---|
-| 1 | Registro la solicitud con el nuevo rol y la aprobación del responsable del área de destino | Sin aprobación no hay cambio |
+| 1 | Registro la solicitud con el nuevo rol y la aprobación del responsable del área de destino | El cambio de permisos necesita aprobación previa |
 | 2 | Retiro los grupos del rol anterior y añado los del nuevo en la misma intervención | Evitar la acumulación de permisos: quien cambia de puesto no debe conservar los accesos del anterior |
 | 3 | Muevo la cuenta a la OU del nuevo departamento, si aplica | Que la estructura de AD refleje la organización real |
 | 4 | Compruebo *Member Of*: solo grupos del rol nuevo | Verificación antes del cierre |

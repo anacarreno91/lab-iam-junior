@@ -6,17 +6,17 @@
 
 Los permisos se asignan a **grupos que representan un rol**, nunca a usuarios concretos. Una persona tiene un acceso solo porque pertenece al grupo de su rol.
 
-Por qué importa en operación y en auditoría:
+Esto facilita dos tareas:
 
-- **Revisar es posible:** la lista de miembros de un grupo dice exactamente quién tiene ese acceso.
-- **Revocar es completo:** sacar a alguien del grupo le retira todo lo que ese rol le daba, sin tener que buscar permisos sueltos.
+- **Revisar:** para saber quién tiene un acceso basta con mirar los miembros del grupo.
+- **Revocar:** al sacar a alguien del grupo pierde todos los permisos de ese rol, sin tener que buscarlos uno a uno.
 
 ## Roles del lab
 
 | Grupo | Tipo | Rol | Estado |
 |---|---|---|---|
-| `GG-Ventas` | Seguridad, ámbito global | Personal de Ventas | ✅ Creado y en uso ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)) |
-| `GG-Ventas-RO` | Seguridad, ámbito global | Consulta (solo lectura) | ✅ Creado ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)), sin uso todavía |
+| `GG-Ventas` | Seguridad, ámbito global | Personal de Ventas | Creado y en uso ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)) |
+| `GG-Ventas-RO` | Seguridad, ámbito global | Consulta (solo lectura) | Creado ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)), sin uso todavía |
 
 El ámbito global de `GG-Ventas` lo confirma el propio registro: al retirar a `a.baja`, Windows generó el evento 4729, que es el de los grupos globales de seguridad. En un grupo local de dominio habría sido el 4733.
 
