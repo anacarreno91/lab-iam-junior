@@ -1,8 +1,8 @@
 # Evidencias
 
-> **⚠️ CASO SIMULADO.** `a.baja` es un usuario ficticio de laboratorio. No es una persona real. Todas las capturas son del dominio de pruebas `iamlab.local`.
+> **⚠️ CASO SIMULADO.** `a.baja` y `ext.mantenimiento` son usuarios ficticios de laboratorio. No corresponden a ninguna persona ni empresa real. Todas las capturas son del dominio de pruebas `iamlab.local`.
 
-Nueve capturas de Windows Server 2022 (interfaz en inglés): seis de la ejecución del ciclo el **26/10/2026** y tres de la autoauditoría del **27/10/2026**. Las horas son las del reloj de la máquina virtual, pasadas a formato de 24 horas. Ninguna imagen está editada.
+Doce capturas de Windows Server 2022 (interfaz en inglés): seis de la ejecución del ciclo el **26/10/2026**, tres de la autoauditoría del **27/10/2026** y tres del alta de un usuario externo el **29/10/2026**. Las horas son las del reloj de la máquina virtual, pasadas a formato de 24 horas. Ninguna imagen está editada.
 
 Muestran qué acceso se concedió, cuándo se retiró y qué registró Windows en cada paso.
 
@@ -28,6 +28,12 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 | 27/10 08:40 | `Get-ADUser` antes (`True`) y después (`False`) de la corrección | `04-correccion-H01-PasswordNeverExpires-False.png` |
 | 27/10 08:43 | Revisión `SIM-003`: `GG-Ventas` sin miembros | `04-revision-SIM-003-GG-Ventas-vacia.png` |
 | 27/10 09:05 | Exportación de la línea temporal y de `whenCreated` | `03-linea-temporal-a.baja.png` |
+| 29/10 07:39:10 | Solicitud `SIM-005` registrada, antes de cualquier cambio | `05-externo-alta-powershell.png` |
+| 29/10 07:39:29 | Creación de la OU `Proveedores` y del grupo `GG-Mantenimiento-Externo` | `05-externo-alta-powershell.png` |
+| 29/10 07:44:40 | `ext.mantenimiento` creada (4720) y habilitada (4722), con caducidad el 28/11/2026 | `05-externo-caducidad-y-eventos.png` |
+| 29/10 07:45:39 | Añadida a `GG-Mantenimiento-Externo` (4728) | `05-externo-caducidad-y-eventos.png` |
+| 29/10 07:51 | Pestaña *Account*: caducidad y cambio de contraseña obligatorio | `05-externo-account-expires.png` |
+| 29/10 07:52:39 | Control de cuentas que caducan en los próximos 31 días | `05-externo-caducidad-y-eventos.png` |
 
 **Conclusión:** cada captura de estado encaja con un evento del sistema. `GG-Ventas` se añade a las 14:17:26 y aparece en la captura de las 14:21; se retira a las 14:26:28 y ya no está en la de las 14:28. El único 4722 de toda la línea temporal es el de la creación, así que después de la baja la cuenta no volvió a estar habilitada en ningún momento.
 
@@ -96,12 +102,34 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 - **Control:** A.5.18 Derechos de acceso (revisión).
 - **Resultado:** sin desviaciones. Ninguna cuenta dada de baja sigue en `GG-Ventas`.
 
+## Capturas del 29/10/2026: usuario externo
+
+### 05-externo-alta-powershell.png · 07:59
+
+- **Qué se ve:** el historial de PowerShell (`Get-History`) con la hora de cada comando: la solicitud `SIM-005` a las 07:39:10, la creación de la OU y del grupo, la creación de la cuenta y su alta en el grupo. Debajo, `Get-ADUser` con la cuenta habilitada, la caducidad, *PasswordNeverExpires: False* y su único grupo.
+- **Pregunta de auditoría:** ¿se registró la solicitud antes de actuar y se concedió solo lo necesario?
+- **Control:** A.5.16 Gestión de identidades y A.5.18 Derechos de acceso.
+- **Nota:** el comando de las 07:40:52 no llegó a ejecutarse, porque se pegó dos veces seguido. La cuenta se creó con el de las 07:44:22 (evento 4720 a las 07:44:40).
+
+### 05-externo-account-expires.png · 07:51
+
+- **Qué se ve:** la OU `Proveedores` y la pestaña *Account* de `ext.mantenimiento`: *User must change password at next logon* marcada, *Password never expires* sin marcar y *Account expires: End of* 27 de noviembre de 2026.
+- **Pregunta de auditoría:** ¿el acceso del externo tiene fin y sigue la política de contraseñas?
+- **Control:** A.5.18 Derechos de acceso y A.5.17 Información de autenticación.
+- **Nota:** la cuenta caduca el 28/11 a las 7:44; la consola lo muestra como «hasta el final del día 27».
+
+### 05-externo-caducidad-y-eventos.png · 07:54
+
+- **Qué se ve:** `Search-ADAccount -AccountExpiring` con `ext.mantenimiento` y su fecha de caducidad, y la línea temporal de la cuenta en el registro de Seguridad (4720, 4738, 4722 y 4728).
+- **Pregunta de auditoría:** ¿se controlan las cuentas externas que van a caducar y lo confirma el sistema?
+- **Control:** A.8.15 Registros de eventos y A.5.18 Derechos de acceso.
+
 ## Estado de los hallazgos
 
 | ID | Resumen | Estado |
 |---|---|---|
 | H-01 | *Password never expires* marcada en `a.baja` | Cerrado el 27/10/2026 |
-| H-02 | Hora de la solicitud de baja no anotada: el plazo de 24 h no se puede demostrar | Abierto: se cerrará en el próximo caso |
+| H-02 | Hora de la solicitud de baja no anotada: el plazo de 24 h no se puede demostrar | Cerrado el 29/10/2026: procedimiento corregido en `SIM-005` |
 | H-03 | Captura del Event Viewer sin cuenta de destino ni eventos de alta, y un 4725 sin atribuir | Cerrado el 27/10/2026 |
 
 El detalle está en el [README principal](../README.md#hallazgos-de-la-autoauditoría).

@@ -17,6 +17,7 @@ Este lab usa la numeración de **ISO/IEC 27001:2022**. En la versión de 2013 es
 | Pregunta del auditor | Respuesta en este repositorio |
 |---|---|
 | ¿Hubo solicitud y aprobación? | [Registro](../registros/registro-solicitudes-acceso.csv): columnas `solicitante` y `aprobador` (simulados) |
+| ¿Se registra la solicitud antes de actuar? | Desde `SIM-005`, sí: solicitud a las 07:39:10 y alta completa a las 07:45:39 (captura [05 alta](../evidencias/05-externo-alta-powershell.png)) |
 | ¿Se concedió lo aprobado y nada más? | Captura 01 Member Of (14:21): `Domain Users` y `GG-Ventas`, nada más |
 | ¿Se retiró el acceso a tiempo? | Ejecución a las 14:25:49 (4725) y 14:26:28 (4729). La hora de la solicitud no se anotó, así que el plazo todavía no se puede demostrar (H-02) |
 | ¿Lo confirma el sistema, no solo la operadora? | Captura 03: eventos 4725 y 4729 generados por Windows, coherentes con las capturas de antes (14:21) y después (14:28). La [línea temporal](../evidencias/03-linea-temporal-a.baja.png) filtrada por `a.baja` confirma que son de esta cuenta e incluye también los eventos del alta (H-03, cerrado) |

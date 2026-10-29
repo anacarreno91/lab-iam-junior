@@ -17,6 +17,7 @@ Esto facilita dos tareas:
 |---|---|---|---|
 | `GG-Ventas` | Seguridad, ámbito global | Personal de Ventas | Creado y en uso ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)) |
 | `GG-Ventas-RO` | Seguridad, ámbito global | Consulta (solo lectura) | Creado ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)), sin uso todavía |
+| `GG-Mantenimiento-Externo` | Seguridad, ámbito global | Proveedor externo de mantenimiento | Creado y en uso ([05 alta](../evidencias/05-externo-alta-powershell.png)) |
 
 El ámbito global de `GG-Ventas` lo confirma el propio registro: al retirar a `a.baja`, Windows generó el evento 4729, que es el de los grupos globales de seguridad. En un grupo local de dominio habría sido el 4733.
 

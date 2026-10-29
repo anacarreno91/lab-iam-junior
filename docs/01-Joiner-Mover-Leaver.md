@@ -42,3 +42,22 @@ Cada petición sigue el mismo circuito, igual que un expediente: **solicitud reg
 **¿Por qué deshabilitar y no borrar?** Una cuenta deshabilitada no permite iniciar sesión, pero conserva su identificador (SID), sus atributos y su relación con el historial, que es lo que se necesita en una auditoría o una investigación. Si se borrara y hubiera que volver a crearla, sería una cuenta distinta con otro SID. El borrado se hace más tarde, cuando lo indique la política de conservación.
 
 **¿Por qué sigue apareciendo `Domain Users`?** Es el grupo principal (*Primary group*) que Active Directory asigna a todas las cuentas y no se puede quitar sin asignar otro grupo principal. En este lab no tiene permisos sobre recursos de Ventas; lo que impide usar la cuenta es que está deshabilitada.
+
+## Usuario externo (alta con caducidad)
+
+El personal externo, como el técnico de un proveedor, necesita acceso solo mientras dura su trabajo. Por eso su cuenta lleva una **fecha de caducidad**: si nadie pide la baja a tiempo, la cuenta deja de funcionar sola y no se queda huérfana. Ejecutado el 29/10/2026 como `SIM-005`.
+
+| Paso | Qué hago | Qué queda como evidencia |
+|---|---|---|
+| 1 | Registro la solicitud con su hora **antes de tocar AD** | Línea `SIM-005` a las 07:39:10 en el historial de PowerShell |
+| 2 | Creo la OU `Proveedores` y el grupo `GG-Mantenimiento-Externo` | Historial: 07:39:29 |
+| 3 | Creo `ext.mantenimiento` en `OU=Proveedores`, con caducidad a 30 días y *User must change password at next logon*. *Password never expires* queda desactivado | Eventos 4720 y 4722 a las 07:44:40 |
+| 4 | Lo añado **solo** a `GG-Mantenimiento-Externo` | Evento 4728 a las 07:45:39 |
+| 5 | Compruebo el estado y la fecha de caducidad | Capturas [05 alta](../evidencias/05-externo-alta-powershell.png) y [05 caducidad](../evidencias/05-externo-account-expires.png) |
+| 6 | Compruebo qué cuentas caducan en los próximos 31 días | `Search-ADAccount -AccountExpiring`, captura [05 eventos](../evidencias/05-externo-caducidad-y-eventos.png) |
+
+Entre la solicitud (07:39:10) y el alta completa (07:45:39) pasaron 6 minutos y 29 segundos.
+
+**¿Por qué la consola dice «End of: 27 de noviembre» y PowerShell, 28/11 a las 7:44?** Es el mismo dato. La cuenta caduca el 28 a esa hora, y la consola de Active Directory lo muestra como «hasta el final del día 27».
+
+**Nota sobre el historial:** el comando de las 07:40:52 no llegó a ejecutarse, porque se pegó dos veces seguido en la misma línea. La cuenta se creó con el de las 07:44:22, como confirma el evento 4720 de las 07:44:40.
