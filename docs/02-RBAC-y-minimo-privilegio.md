@@ -19,9 +19,9 @@ Esto facilita dos tareas:
 | `GG-Ventas-RO` | Seguridad, ámbito global | Consulta (solo lectura) | Creado ([01 OU](../evidencias/01-alta-joiner-OU-Ventas.png)), sin uso todavía |
 | `GG-Mantenimiento-Externo` | Seguridad, ámbito global | Proveedor externo de mantenimiento | Creado y en uso ([05 alta](../evidencias/05-externo-alta-powershell.png)) |
 
-El ámbito global de `GG-Ventas` lo confirma el propio registro: al retirar a `a.baja`, Windows generó el evento 4729, que es el de los grupos globales de seguridad. En un grupo local de dominio habría sido el 4733.
+El propio registro confirma que `GG-Ventas` es un grupo global: al retirar a `a.baja`, Windows generó el evento 4729, que es el que corresponde a los grupos globales de seguridad.
 
-**Nomenclatura:** `GG-` indica grupo global y `-RO` (*read only*) indica solo lectura. Sigue el modelo clásico de Microsoft para Active Directory (AGDLP): las cuentas se incluyen en grupos globales por rol, y los permisos sobre los recursos se conceden a grupos locales de dominio que contienen esos grupos globales. En este lab está implementado el primer nivel: cuentas en grupos globales.
+**Nomenclatura:** `GG-` indica grupo global y `-RO` (*read only*), solo lectura. Así el nombre ya dice qué tipo de grupo es y qué permiso da.
 
 ## Mínimo privilegio aplicado a `a.baja`
 

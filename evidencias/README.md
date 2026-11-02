@@ -42,41 +42,29 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 ### 01-alta-joiner-OU-Ventas.png · 14:20
 
 - **Qué se ve:** Active Directory Users and Computers con la OU `Ventas` abierta: `a.baja` (habilitada) y los grupos de seguridad `GG-Ventas` y `GG-Ventas-RO`. La columna *Description* muestra el aviso de caso simulado.
-- **Pregunta de auditoría:** ¿la cuenta existe donde dice el procedimiento y está identificada?
-- **Control:** A.5.16 Gestión de identidades.
 
 ### 01-alta-joiner-memberof-GG-Ventas.png · 14:21
 
 - **Qué se ve:** *a.baja Properties → Member Of*: `Domain Users` (grupo principal) y `GG-Ventas`. Nada más.
-- **Pregunta de auditoría:** ¿se concedió solo lo aprobado?
-- **Control:** A.5.18 Derechos de acceso.
 - **Para qué sirve:** es la línea base. Sin saber con certeza qué accesos se dieron, no se puede asegurar después que la baja los retiró todos.
 
 ### 02-baja-leaver-memberof-revocada.png · 14:28
 
 - **Qué se ve:** *Member Of* con solo `Domain Users` y *Primary group: Domain Users*. `GG-Ventas` ya no está.
-- **Pregunta de auditoría:** ¿se retiraron todos los accesos de negocio?
-- **Control:** A.5.18 Derechos de acceso.
 - **Nota:** `Domain Users` no se puede quitar porque es el grupo principal (ver [docs/01](../docs/01-Joiner-Mover-Leaver.md#leaver-baja)).
 
 ### 02-baja-leaver-Account-is-disabled.png · 14:30
 
 - **Qué se ve:** pestaña *Account* con *Account is disabled* marcada y *Account expires: Never*. Al fondo, la pantalla de bienvenida de Microsoft Edge de la máquina virtual, sin datos personales.
-- **Pregunta de auditoría:** ¿la cuenta puede iniciar sesión?
-- **Control:** A.5.18 Derechos de acceso.
 - **Hallazgo H-01:** también se ve *Password never expires* marcada. Corregido el 27/10/2026 (ver `04-correccion-H01-PasswordNeverExpires-False.png`).
 
 ### 02-baja-leaver-OU-deshabilitada.png · 16:47
 
 - **Qué se ve:** la OU `Ventas` con `a.baja` mostrando el icono de cuenta deshabilitada (flecha hacia abajo) y el aviso de caso simulado en *Description*.
-- **Pregunta de auditoría:** ¿el estado final es visible para cualquiera que revise la OU?
-- **Control:** A.5.18 Derechos de acceso.
 
 ### 03-auditoria-eventos-4725-4729.png · 17:00
 
 - **Qué se ve:** *Event Viewer → Windows Logs → Security* filtrado, con tres eventos: 4725 a las 14:25:49, 4729 a las 14:26:28 y 4725 a las 16:47:39. Debajo, el detalle de un 4725 (*A user account was disabled*).
-- **Pregunta de auditoría:** ¿cuándo se ejecutó la baja y lo confirma el sistema, no solo la operadora?
-- **Control:** A.8.15 Registros de eventos.
 - **Limitación:** no se ve la cuenta de destino. La atribución a `a.baja` la aporta la línea temporal del 27/10 (H-03, cerrado).
 
 ## Capturas del 27/10/2026: autoauditoría
@@ -84,22 +72,16 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 ### 03-linea-temporal-a.baja.png · 09:05
 
 - **Qué se ve:** PowerShell con `Get-WinEvent -FilterHashtable` sobre el registro de Seguridad, filtrado por los ID 4720, 4722, 4725, 4728, 4729 y 4738 y por el texto `a.baja`, ordenado por fecha, con la descripción de cada evento. Debajo, `Get-ADUser` con `whenCreated` (26/10/2026 14:00:03).
-- **Pregunta de auditoría:** ¿qué le pasó a esta cuenta, cuándo y en qué orden, según el sistema?
-- **Control:** A.8.15 Registros de eventos y A.5.16 Gestión de identidades.
 - **Nota:** en la parte superior se ve un intento anterior con `-MaxEvents 200`. Ese comando solo leía los 200 eventos más recientes del registro y por eso no encontraba los del día anterior. La línea temporal válida es la tabla con la columna *Evento*.
 
 ### 04-correccion-H01-PasswordNeverExpires-False.png · 08:40
 
 - **Qué se ve:** `Get-ADUser a.baja` con *PasswordNeverExpires: True*, la corrección con `Set-ADUser -PasswordNeverExpires $false` y la misma consulta con *False*.
-- **Pregunta de auditoría:** ¿se corrigió el hallazgo y hay prueba del antes y del después?
-- **Control:** A.5.17 Información de autenticación.
 - **Nota:** la primera línea, con una `\` delante de `Set-ADUser`, es un error de tecleo. El registro muestra un único 4738 el 27/10 (08:37:52), así que el cambio se aplicó una sola vez.
 
 ### 04-revision-SIM-003-GG-Ventas-vacia.png · 08:43
 
 - **Qué se ve:** la misma consola y, al final, `Get-ADGroupMember GG-Ventas`, que no devuelve ningún miembro.
-- **Pregunta de auditoría:** ¿alguien conserva un acceso que ya no le corresponde?
-- **Control:** A.5.18 Derechos de acceso (revisión).
 - **Resultado:** sin desviaciones. Ninguna cuenta dada de baja sigue en `GG-Ventas`.
 
 ## Capturas del 29/10/2026: usuario externo
@@ -107,22 +89,16 @@ Eventos del registro de Seguridad filtrados por `a.baja` ([03-linea-temporal-a.b
 ### 05-externo-alta-powershell.png · 07:59
 
 - **Qué se ve:** el historial de PowerShell (`Get-History`) con la hora de cada comando: la solicitud `SIM-005` a las 07:39:10, la creación de la OU y del grupo, la creación de la cuenta y su alta en el grupo. Debajo, `Get-ADUser` con la cuenta habilitada, la caducidad, *PasswordNeverExpires: False* y su único grupo.
-- **Pregunta de auditoría:** ¿se registró la solicitud antes de actuar y se concedió solo lo necesario?
-- **Control:** A.5.16 Gestión de identidades y A.5.18 Derechos de acceso.
 - **Nota:** el comando de las 07:40:52 no llegó a ejecutarse, porque se pegó dos veces seguido. La cuenta se creó con el de las 07:44:22 (evento 4720 a las 07:44:40).
 
 ### 05-externo-account-expires.png · 07:51
 
 - **Qué se ve:** la OU `Proveedores` y la pestaña *Account* de `ext.mantenimiento`: *User must change password at next logon* marcada, *Password never expires* sin marcar y *Account expires: End of* 27 de noviembre de 2026.
-- **Pregunta de auditoría:** ¿el acceso del externo tiene fin y sigue la política de contraseñas?
-- **Control:** A.5.18 Derechos de acceso y A.5.17 Información de autenticación.
 - **Nota:** la cuenta caduca el 28/11 a las 7:44; la consola lo muestra como «hasta el final del día 27».
 
 ### 05-externo-caducidad-y-eventos.png · 07:54
 
 - **Qué se ve:** `Search-ADAccount -AccountExpiring` con `ext.mantenimiento` y su fecha de caducidad, y la línea temporal de la cuenta en el registro de Seguridad (4720, 4738, 4722 y 4728).
-- **Pregunta de auditoría:** ¿se controlan las cuentas externas que van a caducar y lo confirma el sistema?
-- **Control:** A.8.15 Registros de eventos y A.5.18 Derechos de acceso.
 
 ## Estado de los hallazgos
 

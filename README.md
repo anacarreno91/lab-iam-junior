@@ -15,7 +15,7 @@ Laboratorio personal para practicar tareas de operación IAM de nivel 1 en Activ
 | **Usuario externo con caducidad** | `ext.mantenimiento` en `OU=Proveedores`, solo en `GG-Mantenimiento-Externo` y con caducidad a 30 días. Solicitud registrada antes de ejecutar (07:39:10) | [05 alta](evidencias/05-externo-alta-powershell.png) · [05 caducidad](evidencias/05-externo-account-expires.png) · [05 eventos](evidencias/05-externo-caducidad-y-eventos.png) |
 | **Autoauditoría** | 3 hallazgos detectados en mis propias evidencias, los 3 cerrados con evidencia | [hallazgos](#hallazgos-de-la-autoauditoría) |
 | **RBAC** | Permisos por grupo de rol: `GG-Ventas` y `GG-Ventas-RO` | [docs/02](docs/02-RBAC-y-minimo-privilegio.md) |
-| **ISO/IEC 27001:2022** | Controles A.5.16, A.5.18 y A.8.15 (en la versión 2013: A.9.2 y A.12.4) | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md) |
+| **ISO/IEC 27001:2022** | Controles A.5.16, A.5.18 y A.8.15 | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md) |
 
 <p>
 <img src="evidencias/01-alta-joiner-memberof-GG-Ventas.png" width="32%" alt="01 · Tras el alta: Domain Users y GG-Ventas">
@@ -53,19 +53,19 @@ Al revisar mis capturas y el registro de eventos encontré tres fallos en mi pro
 
 | ID | Hallazgo | Estado | Cierre |
 |---|---|---|---|
-| H-01 | `a.baja` tenía marcada *Password never expires*. Contradecía mi procedimiento de alta (contraseña temporal con cambio obligatorio) y, en un entorno real, sería una desviación de la política de contraseñas (A.5.17). | Cerrado el 27/10/2026 | Corregido con `Set-ADUser` (`SIM-004`). Evidencia: estado antes y después en [04 corrección](evidencias/04-correccion-H01-PasswordNeverExpires-False.png) y evento 4738 a las 08:37:52 en la [línea temporal](evidencias/03-linea-temporal-a.baja.png). |
+| H-01 | `a.baja` tenía marcada *Password never expires*. Contradecía mi procedimiento de alta (contraseña temporal con cambio obligatorio) y, en un entorno real, sería una desviación de la política de contraseñas. | Cerrado el 27/10/2026 | Corregido con `Set-ADUser` (`SIM-004`). Evidencia: estado antes y después en [04 corrección](evidencias/04-correccion-H01-PasswordNeverExpires-False.png) y evento 4738 a las 08:37:52 en la [línea temporal](evidencias/03-linea-temporal-a.baja.png). |
 | H-02 | No anoté la hora de la solicitud de baja simulada (`SIM-002`) antes de ejecutarla, así que el plazo de 24 h de esa baja no se puede demostrar con evidencia. | Cerrado el 29/10/2026 | La hora de `SIM-002` no se corrige hacia atrás, porque sería falsear la evidencia. Corregí el procedimiento: en `SIM-005` registré la solicitud a las 07:39:10, antes de cualquier cambio, y el alta quedó completa a las 07:45:39 ([05 alta](evidencias/05-externo-alta-powershell.png)). |
 | H-03 | La captura del Event Viewer no mostraba la cuenta de destino ni los eventos del alta, y tenía un segundo 4725 a las 16:47:39 sin explicar. | Cerrado el 27/10/2026 | Línea temporal exportada con PowerShell y filtrada por `a.baja` ([03 línea temporal](evidencias/03-linea-temporal-a.baja.png)). El 4725 de las 16:47:39 es de `a.baja` y no tiene un 4722 (cuenta habilitada) antes: la deshabilitación se volvió a aplicar sobre una cuenta que ya estaba deshabilitada, y no hubo ninguna ventana de acceso. |
 
 ## Mapeo con ISO/IEC 27001:2022
 
-| Control (2022) | Qué exige, en resumen | Qué hago en el lab | Equivalencia 2013 |
-|---|---|---|---|
-| **A.5.16** Gestión de identidades | Gestionar el ciclo de vida completo de las identidades | Alta y baja de `a.baja` y alta con caducidad de `ext.mantenimiento`, con cada paso registrado | A.9.2.1 |
-| **A.5.18** Derechos de acceso | Conceder, revisar, modificar y retirar los accesos según la política de control de acceso | Alta solo en `GG-Ventas`, retirada en la baja y revisión del grupo (`SIM-003`) | A.9.2.2, A.9.2.5, A.9.2.6 |
-| **A.8.15** Registros de eventos | Generar, conservar y proteger los registros de actividad | Línea temporal de `a.baja` en el registro de Seguridad: 4720, 4722, 4728, 4725, 4729 y 4738 | A.12.4.1 a A.12.4.3 |
+| Control | Qué exige, en resumen | Qué hago en el lab |
+|---|---|---|
+| **A.5.16** Gestión de identidades | Gestionar el ciclo de vida completo de las identidades | Alta y baja de `a.baja` y alta con caducidad de `ext.mantenimiento`, con cada paso registrado |
+| **A.5.18** Derechos de acceso | Conceder, revisar, modificar y retirar los accesos según la política de control de acceso | Alta solo en `GG-Ventas`, retirada en la baja y revisión del grupo (`SIM-003`) |
+| **A.8.15** Registros de eventos | Generar, conservar y proteger los registros de actividad | Línea temporal de `a.baja` en el registro de Seguridad: 4720, 4722, 4728, 4725, 4729 y 4738 |
 
-La versión 2013 de la norma dejó de ser válida para certificar el 31 de octubre de 2025. Este repositorio usa la numeración de 2022 e indica la antigua solo como referencia.
+El repositorio usa la numeración de la versión 2022 de la norma.
 
 ## Relación con entornos industriales (OT)
 
@@ -73,13 +73,12 @@ El laboratorio es un entorno IT. No tengo experiencia en entornos industriales; 
 
 - En OT la prioridad es la disponibilidad. Una cuenta que no se revoca a tiempo, por ejemplo la de un técnico externo que ya terminó su trabajo, es un riesgo para la continuidad del proceso. Por eso el objetivo de baja en menos de 24 horas, la revisión periódica y, para el personal externo, una fecha de caducidad en la propia cuenta.
 - Las cuentas compartidas impiden saber quién hizo cada cambio, así que cada persona debe tener su propia cuenta. En este lab todavía administro con la cuenta Administrator integrada (ver límites).
-- La Directiva NIS2 (UE) 2022/2555 incluye las políticas de control de acceso entre las medidas de gestión de riesgos de ciberseguridad (art. 21.2.i) y sitúa la energía entre los sectores de alta criticidad (anexo I).
 
 ## Límites del laboratorio
 
 - Un solo controlador de dominio, sin usuarios reales y sin conexión con ningún sistema de producción.
 - Solicitudes y aprobaciones simuladas. En una empresa llegarían por ticket desde RRHH o desde el responsable del área.
-- Ejecuto y verifico yo misma. En un entorno real la verificación la haría otra persona (segregación de funciones, ISO/IEC 27001:2022 A.5.3).
+- Ejecuto y verifico yo misma. En un entorno real la verificación la haría otra persona (segregación de funciones).
 - Las acciones se hacen con la cuenta Administrator integrada del dominio. En un entorno real se usaría una cuenta de administración nominal, para que cada cambio quede asociado a una persona.
 - Solo herramientas nativas de Windows Server: no se usa ninguna plataforma de gobierno de identidades (IGA) ni de accesos privilegiados (PAM).
 - Ejecución del ciclo el 26/10/2026; autoauditoría, corrección y primera revisión el 27/10/2026; alta del usuario externo el 29/10/2026.
