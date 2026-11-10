@@ -10,12 +10,13 @@ Laboratorio personal para practicar tareas de operación IAM de nivel 1 en Activ
 |---|---|---|
 | **Alta con mínimo privilegio** (Joiner) | `a.baja` creada a las 14:00:03 (4720) y añadida solo a `GG-Ventas` a las 14:17:26 (4728) | [01 OU](evidencias/01-alta-joiner-OU-Ventas.png) · [01 Member Of](evidencias/01-alta-joiner-memberof-GG-Ventas.png) |
 | **Baja y revocación** (Leaver) | Deshabilitada a las 14:25:49 (4725) y retirada de `GG-Ventas` a las 14:26:28 (4729) | [02 Member Of](evidencias/02-baja-leaver-memberof-revocada.png) · [02 Account](evidencias/02-baja-leaver-Account-is-disabled.png) · [02 OU](evidencias/02-baja-leaver-OU-deshabilitada.png) |
-| **Trazabilidad completa** | Línea temporal de `a.baja` extraída del registro de Seguridad con PowerShell, coherente con todas las capturas | [03 línea temporal](evidencias/03-linea-temporal-a.baja.png) · [03 eventos](evidencias/03-auditoria-eventos-4725-4729.png) · [cronología](evidencias/README.md#línea-temporal) |
-| **Revisión de accesos** | `SIM-003`: `GG-Ventas` sin miembros; ninguna cuenta dada de baja conserva el acceso | [04 revisión](evidencias/04-revision-SIM-003-GG-Ventas-vacia.png) |
-| **Usuario externo con caducidad** | `ext.mantenimiento` en `OU=Proveedores`, solo en `GG-Mantenimiento-Externo` y con caducidad a 30 días. Solicitud registrada antes de ejecutar (07:39:10) | [05 alta](evidencias/05-externo-alta-powershell.png) · [05 caducidad](evidencias/05-externo-account-expires.png) · [05 eventos](evidencias/05-externo-caducidad-y-eventos.png) |
-| **Autoauditoría** | 3 hallazgos detectados en mis propias evidencias, los 3 cerrados con evidencia | [hallazgos](#hallazgos-de-la-autoauditoría) |
-| **RBAC** | Permisos por grupo de rol: `GG-Ventas` y `GG-Ventas-RO` | [docs/02](docs/02-RBAC-y-minimo-privilegio.md) |
-| **ISO/IEC 27001:2022** | Controles A.5.16, A.5.18 y A.8.15 | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md) |
+| **Trazabilidad con 6 tipos de eventos** | Línea temporal de `a.baja` extraída del registro de Seguridad con PowerShell (4720, 4722, 4725, 4728, 4729 y 4738), coherente con todas las capturas | [03 línea temporal](evidencias/03-linea-temporal-a.baja.png) · [03 eventos](evidencias/03-auditoria-eventos-4725-4729.png) · [cronología](evidencias/README.md#línea-temporal) |
+| **Revisión de accesos** | `SIM-003`, revisión manual de `GG-Ventas`: 0 desviaciones en el conjunto de pertenencias revisado. El grupo no tenía miembros en ese momento, así que ninguna cuenta dada de baja conservaba el acceso | [04 revisión](evidencias/04-revision-SIM-003-GG-Ventas-vacia.png) |
+| **Usuario externo con caducidad** | `ext.mantenimiento` en `OU=Proveedores`, solo en `GG-Mantenimiento-Externo`, con caducidad a 30 días (28/11/2026) y *Password never expires* desactivado. Solicitud registrada a las 07:39:10, antes de ejecutar, y alta completa a las 07:45:39 (6 min 29 s) | [05 alta](evidencias/05-externo-alta-powershell.png) · [05 caducidad](evidencias/05-externo-account-expires.png) · [05 eventos](evidencias/05-externo-caducidad-y-eventos.png) |
+| **Mover** (cambio de rol) | Procedimiento escrito, sin ejecutar | [docs/01](docs/01-Joiner-Mover-Leaver.md#mover-cambio-de-rol) |
+| **Autoauditoría** | 3 hallazgos identificados y documentados en mis propias evidencias: corrección técnica (H-01), mejora de evidencias (H-03) y actualización del procedimiento (H-02), con cierre documental | [hallazgos](#hallazgos-de-la-autoauditoría) |
+| **RBAC** | Grupos por rol: `GG-Ventas` y `GG-Mantenimiento-Externo` en uso; `GG-Ventas-RO` creado, todavía sin uso. El acceso se demuestra por la pertenencia al grupo; los permisos sobre una carpeta compartida están pendientes | [docs/02](docs/02-RBAC-y-minimo-privilegio.md) |
+| **ISO/IEC 27001:2022** | Referencia a los controles A.5.16, A.5.18 y A.8.15 | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md) |
 
 <p>
 <img src="evidencias/01-alta-joiner-memberof-GG-Ventas.png" width="32%" alt="01 · Tras el alta: Domain Users y GG-Ventas">
@@ -33,31 +34,35 @@ Una petición de alta o de baja de accesos es el mismo tipo de trabajo: llega un
 
 - **Dominio:** `iamlab.local`, con un controlador de dominio Windows Server 2022 en VirtualBox. La interfaz está en inglés, así que la documentación cita los nombres tal como aparecen en pantalla (*Member Of*, *Domain Users*, *Account is disabled*).
 - **Unidades organizativas:** `OU=Ventas` (personal interno) y `OU=Proveedores` (personal externo).
-- **Grupos de seguridad globales:** `GG-Ventas` (rol Ventas), `GG-Ventas-RO` (rol de solo lectura) y `GG-Mantenimiento-Externo` (proveedor de mantenimiento).
+- **Grupos de seguridad globales, definidos por rol:** `GG-Ventas` (rol Ventas, en uso), `GG-Mantenimiento-Externo` (proveedor de mantenimiento, en uso) y `GG-Ventas-RO` (rol de solo lectura, creado y todavía sin uso).
 - **Usuarios de prueba:** `a.baja` (empleado) y `ext.mantenimiento` (proveedor externo), ambos simulados. Su campo *Description* en AD lo indica.
 - **Herramientas:** Active Directory Users and Computers, Event Viewer, PowerShell (módulo de Active Directory y `Get-WinEvent`), VirtualBox y un registro de solicitudes en CSV que se abre en Excel.
 
 ## Casos
 
-| # | Caso | Estado | Detalle |
-|---|---|---|---|
-| 1 | Joiner: alta de `a.baja` en Ventas | Hecho, con capturas y eventos 4720/4728 | [docs/01](docs/01-Joiner-Mover-Leaver.md#joiner-alta) |
-| 2 | Leaver: baja y revocación | Hecho, con capturas y eventos 4725/4729. Plazo no demostrable (H-02) | [docs/01](docs/01-Joiner-Mover-Leaver.md#leaver-baja) |
-| 3 | Revisión de accesos de `GG-Ventas` | Hecha el 27/10/2026, sin desviaciones (`SIM-003`) | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md#revisión-de-accesos-de-gg-ventas) |
-| 4 | Mover: cambio de rol | Solo procedimiento escrito, sin ejecutar | [docs/01](docs/01-Joiner-Mover-Leaver.md#mover-cambio-de-rol) |
-| 5 | Alta de usuario externo con caducidad | Hecho el 29/10/2026, con la solicitud registrada antes de ejecutar (`SIM-005`) | [docs/01](docs/01-Joiner-Mover-Leaver.md#usuario-externo-alta-con-caducidad) |
+Cinco escenarios documentados. Cuatro están ejecutados y uno, el Mover, es solo un procedimiento escrito.
+
+| # | Caso | ID en el registro | Estado | Detalle |
+|---|---|---|---|---|
+| 1 | Joiner: alta de `a.baja` en Ventas | `SIM-001` | Hecho, con capturas y eventos 4720/4728 | [docs/01](docs/01-Joiner-Mover-Leaver.md#joiner-alta) |
+| 2 | Leaver: baja y revocación | `SIM-002` | Hecho, con capturas y eventos 4725/4729. Plazo no demostrable (H-02) | [docs/01](docs/01-Joiner-Mover-Leaver.md#leaver-baja) |
+| 3 | Revisión de accesos de `GG-Ventas` | `SIM-003` | Hecha el 27/10/2026: el grupo no tenía miembros, 0 desviaciones | [docs/03](docs/03-ISO27001-2022-control-de-accesos-y-evidencias.md#revisión-de-accesos-de-gg-ventas) |
+| 4 | Mover: cambio de rol | Sin ID (no ejecutado) | Solo procedimiento escrito, sin ejecutar | [docs/01](docs/01-Joiner-Mover-Leaver.md#mover-cambio-de-rol) |
+| 5 | Alta de usuario externo con caducidad | `SIM-005` | Hecho el 29/10/2026, con la solicitud registrada antes de ejecutar | [docs/01](docs/01-Joiner-Mover-Leaver.md#usuario-externo-alta-con-caducidad) |
+
+`SIM-004` no es un caso del ciclo: es la corrección del hallazgo H-01 (ver la tabla siguiente).
 
 ## Hallazgos de la autoauditoría
 
-Al revisar mis capturas y el registro de eventos encontré tres fallos en mi propia ejecución:
+Al revisar mis capturas y el registro de eventos identifiqué tres fallos en mi propia ejecución. Los tres están documentados, con su acción y su cierre documental:
 
-| ID | Hallazgo | Estado | Cierre |
-|---|---|---|---|
-| H-01 | `a.baja` tenía marcada *Password never expires*. Contradecía mi procedimiento de alta (contraseña temporal con cambio obligatorio) y, en un entorno real, sería una desviación de la política de contraseñas. | Cerrado el 27/10/2026 | Corregido con `Set-ADUser` (`SIM-004`). Evidencia: estado antes y después en [04 corrección](evidencias/04-correccion-H01-PasswordNeverExpires-False.png) y evento 4738 a las 08:37:52 en la [línea temporal](evidencias/03-linea-temporal-a.baja.png). |
-| H-02 | No anoté la hora de la solicitud de baja simulada (`SIM-002`) antes de ejecutarla, así que el plazo de 24 h de esa baja no se puede demostrar con evidencia. | Cerrado el 29/10/2026 | La hora de `SIM-002` no se corrige hacia atrás, porque sería falsear la evidencia. Corregí el procedimiento: en `SIM-005` registré la solicitud a las 07:39:10, antes de cualquier cambio, y el alta quedó completa a las 07:45:39 ([05 alta](evidencias/05-externo-alta-powershell.png)). |
-| H-03 | La captura del Event Viewer no mostraba la cuenta de destino ni los eventos del alta, y tenía un segundo 4725 a las 16:47:39 sin explicar. | Cerrado el 27/10/2026 | Línea temporal exportada con PowerShell y filtrada por `a.baja` ([03 línea temporal](evidencias/03-linea-temporal-a.baja.png)). El 4725 de las 16:47:39 es de `a.baja` y no tiene un 4722 (cuenta habilitada) antes: la deshabilitación se volvió a aplicar sobre una cuenta que ya estaba deshabilitada, y no hubo ninguna ventana de acceso. |
+| ID | Hallazgo | Tipo de acción | Estado | Cierre |
+|---|---|---|---|---|
+| H-01 | `a.baja` tenía marcada *Password never expires*. Contradecía mi procedimiento de alta (contraseña temporal con cambio obligatorio) y, en un entorno real, sería una desviación de la política de contraseñas. | Corrección técnica | Cerrado el 27/10/2026 | Corregido con `Set-ADUser` (`SIM-004`). Evidencia: estado antes y después en [04 corrección](evidencias/04-correccion-H01-PasswordNeverExpires-False.png) y evento 4738 a las 08:37:52 en la [línea temporal](evidencias/03-linea-temporal-a.baja.png). |
+| H-02 | No anoté la hora de la solicitud de baja simulada (`SIM-002`) antes de ejecutarla, así que el plazo de 24 h de esa baja no se puede demostrar con evidencia. | Actualización del procedimiento | Cerrado el 29/10/2026 | La hora de `SIM-002` no se corrige hacia atrás, porque sería falsear la evidencia. Corregí el procedimiento: en `SIM-005` registré la solicitud a las 07:39:10, antes de cualquier cambio, y el alta quedó completa a las 07:45:39 ([05 alta](evidencias/05-externo-alta-powershell.png)). |
+| H-03 | La captura del Event Viewer no mostraba la cuenta de destino ni los eventos del alta, y tenía un segundo 4725 a las 16:47:39 sin explicar. | Mejora de evidencias | Cerrado el 27/10/2026 | Línea temporal exportada con PowerShell y filtrada por `a.baja` ([03 línea temporal](evidencias/03-linea-temporal-a.baja.png)). El 4725 de las 16:47:39 es de `a.baja` y no tiene un 4722 (cuenta habilitada) antes: la deshabilitación se volvió a aplicar sobre una cuenta que ya estaba deshabilitada, y no hubo ninguna ventana de acceso. |
 
-## Mapeo con ISO/IEC 27001:2022
+## Referencia a ISO/IEC 27001:2022
 
 | Control | Qué exige, en resumen | Qué hago en el lab |
 |---|---|---|
@@ -65,7 +70,7 @@ Al revisar mis capturas y el registro de eventos encontré tres fallos en mi pro
 | **A.5.18** Derechos de acceso | Conceder, revisar, modificar y retirar los accesos según la política de control de acceso | Alta solo en `GG-Ventas`, retirada en la baja y revisión del grupo (`SIM-003`) |
 | **A.8.15** Registros de eventos | Generar, conservar y proteger los registros de actividad | Línea temporal de `a.baja` en el registro de Seguridad: 4720, 4722, 4728, 4725, 4729 y 4738 |
 
-El repositorio usa la numeración de la versión 2022 de la norma.
+El repositorio usa la numeración de la versión 2022 de la norma. Es una referencia de aprendizaje: el laboratorio no está certificado ni auditado por terceros.
 
 ## Relación con entornos industriales (OT)
 

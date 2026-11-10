@@ -21,7 +21,7 @@ Este lab usa la numeración de **ISO/IEC 27001:2022**.
 | ¿Se concedió lo aprobado y nada más? | Captura 01 Member Of (14:21): `Domain Users` y `GG-Ventas`, nada más |
 | ¿Se retiró el acceso a tiempo? | Ejecución a las 14:25:49 (4725) y 14:26:28 (4729). La hora de la solicitud no se anotó, así que el plazo de esta baja no se puede demostrar (H-02). Desde `SIM-005` la solicitud se registra antes de actuar |
 | ¿Lo confirma el sistema, no solo la operadora? | Captura 03: eventos 4725 y 4729 generados por Windows, coherentes con las capturas de antes (14:21) y después (14:28). La [línea temporal](../evidencias/03-linea-temporal-a.baja.png) filtrada por `a.baja` confirma que son de esta cuenta e incluye también los eventos del alta (H-03, cerrado) |
-| ¿Se revisan los accesos de forma periódica? | Sí: primera revisión el 27/10/2026, sin desviaciones (`SIM-003`, [captura](../evidencias/04-revision-SIM-003-GG-Ventas-vacia.png)) |
+| ¿Se revisan los accesos de forma periódica? | El procedimiento es mensual. De momento se ha hecho una revisión, el 27/10/2026: `GG-Ventas` sin miembros, sin desviaciones (`SIM-003`, [captura](../evidencias/04-revision-SIM-003-GG-Ventas-vacia.png)) |
 
 ## Revisión de accesos de GG-Ventas
 
